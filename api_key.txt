@@ -1,0 +1,8 @@
+#parikshitdchakole@gmail.com
+
+api_key = 'AIzaSyDnGfIMQEmRnLmSimSvkr67EAJTzDUl77U'
+
+
+
+
+#yt_pip\Scripts\deactivate
