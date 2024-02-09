@@ -60,5 +60,5 @@ def main():
         st.plotly_chart(px.bar(bottom_comments, y='Title', x='Comments', 
                                  labels={'Title': 'Video Title', 'Comments': 'Comments'}, orientation='h'))
 
-if __name__ == "_main_":
+if __name__ == "__main__":
     main()
