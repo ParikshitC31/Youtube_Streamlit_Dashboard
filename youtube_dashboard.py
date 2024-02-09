@@ -41,7 +41,7 @@ def main():
         df = load_data(uploaded_file)
 
         # Convert 'Date' column to datetime
-        df['Date'] = pd.to_datetime(df['Date'])
+        df['Upload Date'] = pd.to_datetime(df['Upload Date'])
 
         # Display top videos by views, likes, and comments
         display_top_videos(df, 'Views')
