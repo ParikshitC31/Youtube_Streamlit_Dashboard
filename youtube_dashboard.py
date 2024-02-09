@@ -1,15 +1,36 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 
 # Function to load data from CSV file
 def load_data(csv_file):
     data = pd.read_csv(csv_file)
     return data
 
+# Function to display top videos by a metric
+def display_top_videos(df, metric, n=7):
+    st.subheader(f"Top {n} Videos by {metric}")
+    top_videos = df.sort_values(by=metric, ascending=False).head(n)
+    st.dataframe(top_videos[['Title', metric]])
+
+# Function to display distribution as pie chart
+def display_pie_chart(data, metric):
+    st.subheader(f"{metric} Distribution")
+    distribution = data[metric].sum()
+    st.plotly_chart(px.pie(values=[distribution], names=[metric], title=f"{metric} Distribution"))
+
+# Function to display trend as line chart
+def display_line_chart(data, metric):
+    st.subheader(f"Trend of {metric} Over Time")
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=data['Date'], y=data[metric], mode='lines+markers'))
+    fig.update_layout(title=f"{metric} Over Time", xaxis_title='Date', yaxis_title=metric)
+    st.plotly_chart(fig)
+
 # Streamlit app UI
 def main():
-    st.set_page_config(page_title="YouTube Video Analytics Dashboard", page_icon=":movie_camera:", layout="wide")
+    st.set_page_config(page_title="YouTube Video Analytics Dashboard", page_icon=":movie_camera:")
     st.title("YouTube Video Analytics Dashboard")
 
     # Upload CSV file
@@ -19,78 +40,25 @@ def main():
         # Load data from CSV
         df = load_data(uploaded_file)
 
-        # Sorting the DataFrame by 'Views', 'Likes', and 'Comments'
-        df_sorted_by_views = df.sort_values(by='Views', ascending=False)
-        df_sorted_by_likes = df.sort_values(by='Likes', ascending=False)
-        df_sorted_by_comments = df.sort_values(by='Comments', ascending=False)
+        # Convert 'Date' column to datetime
+        df['Date'] = pd.to_datetime(df['Date'])
 
-        # Top 7 videos with the most views
-        top_views = df_sorted_by_views.head(7)
-        bottom_views = df_sorted_by_views.tail(7)
+        # Display top videos by views, likes, and comments
+        display_top_videos(df, 'Views')
+        display_top_videos(df, 'Likes')
+        display_top_videos(df, 'Comments')
 
-        # Top 7 videos with the most likes
-        top_likes = df_sorted_by_likes.head(7)
-        bottom_likes = df_sorted_by_likes.tail(7)
+        # Display distribution of views, likes, and comments
+        st.markdown("---")
+        display_pie_chart(df, 'Views')
+        display_pie_chart(df, 'Likes')
+        display_pie_chart(df, 'Comments')
 
-        # Top 7 videos with the most comments
-        top_comments = df_sorted_by_comments.head(7)
-        bottom_comments = df_sorted_by_comments.tail(7)
-
-        # Display top and bottom videos by views, likes, and comments
-        st.markdown("### Top and Bottom Videos by Views, Likes, and Comments")
-        col1, col2, col3 = st.columns(3)
-
-        with col1:
-            st.subheader("Top Videos by Views")
-            st.write(top_views[['Title', 'Views']])
-
-            st.subheader("Top Videos by Likes")
-            st.write(top_likes[['Title', 'Likes']])
-
-            st.subheader("Top Videos by Comments")
-            st.write(top_comments[['Title', 'Comments']])
-
-        with col2:
-            st.subheader("Bottom Videos by Views")
-            st.write(bottom_views[['Title', 'Views']])
-
-            st.subheader("Bottom Videos by Likes")
-            st.write(bottom_likes[['Title', 'Likes']])
-
-            st.subheader("Bottom Videos by Comments")
-            st.write(bottom_comments[['Title', 'Comments']])
-
-        with col3:
-            st.subheader("Top Videos by Views (Bar Chart)")
-            st.plotly_chart(px.bar(top_views, y='Title', x='Views', 
-                                   labels={'Title': 'Video Title', 'Views': 'Views'}, orientation='h'))
-
-            st.subheader("Top Videos by Likes (Bar Chart)")
-            st.plotly_chart(px.bar(top_likes, y='Title', x='Likes', 
-                                   labels={'Title': 'Video Title', 'Likes': 'Likes'}, orientation='h'))
-
-            st.subheader("Top Videos by Comments (Bar Chart)")
-            st.plotly_chart(px.bar(top_comments, y='Title', x='Comments', 
-                                   labels={'Title': 'Video Title', 'Comments': 'Comments'}, orientation='h'))
-
-        # Pie chart showing distribution of views, likes, and comments
-        st.markdown("### Distribution of Views, Likes, and Comments")
-        col4, col5, col6 = st.columns(3)
-
-        with col4:
-            st.subheader("Views Distribution")
-            views_distribution = df['Views'].sum()
-            st.plotly_chart(px.pie(values=[views_distribution], names=["Views"], title="Views Distribution"))
-
-        with col5:
-            st.subheader("Likes Distribution")
-            likes_distribution = df['Likes'].sum()
-            st.plotly_chart(px.pie(values=[likes_distribution], names=["Likes"], title="Likes Distribution"))
-
-        with col6:
-            st.subheader("Comments Distribution")
-            comments_distribution = df['Comments'].sum()
-            st.plotly_chart(px.pie(values=[comments_distribution], names=["Comments"], title="Comments Distribution"))
+        # Display trend of views, likes, and comments over time
+        st.markdown("---")
+        display_line_chart(df, 'Views')
+        display_line_chart(df, 'Likes')
+        display_line_chart(df, 'Comments')
 
 if __name__ == "__main__":
     main()
