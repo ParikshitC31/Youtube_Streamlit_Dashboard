@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
 
 # Function to load data from CSV file
 def load_data(csv_file):
@@ -39,7 +38,7 @@ def main():
         # Create pie chart of views distribution
         views_distribution = filtered_data['Views'].value_counts()
         st.write("### Views Distribution:")
-        st.pyplot(plt.pie(views_distribution, labels=views_distribution.index, autopct='%1.1f%%'))
+        st.write(views_distribution)
 
         # Create line chart of likes vs dislikes
         st.write("### Likes vs Dislikes:")
