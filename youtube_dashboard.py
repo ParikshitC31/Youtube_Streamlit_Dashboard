@@ -1,9 +1,10 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # Function to load data from CSV file
 def load_data(csv_file):
-    data = pd.read_csv('video_metrics.csv')
+    data = pd.read_csv(csv_file)
     return data
 
 # Streamlit app UI
@@ -17,33 +18,32 @@ def main():
         # Load data from CSV
         data = load_data(uploaded_file)
 
-        st.write("### Sample Data:")
-        st.write(data.head())
+        # Query input fields
+        query_title = st.text_input("Enter video title:")
+        query_min_views = st.number_input("Enter minimum views:", min_value=0)
+        query_min_likes = st.number_input("Enter minimum likes:", min_value=0)
+        query_min_dislikes = st.number_input("Enter minimum dislikes:", min_value=0)
 
-        st.write("### Data Summary:")
-        st.write(data.describe())
+        # Filter data based on query inputs
+        filtered_data = data[
+            (data['Title'].str.contains(query_title, case=False)) &
+            (data['Views'] >= query_min_views) &
+            (data['Likes'] >= query_min_likes) &
+            (data['Dislikes'] >= query_min_dislikes)
+        ]
 
-        # Display basic statistics
-        st.write("### Basic Statistics:")
-        st.write(f"Total videos: {len(data)}")
-        st.write(f"Total views: {data['Views'].sum()}")
+        # Display filtered data
+        st.write("### Filtered Data:")
+        st.write(filtered_data)
 
-        # Display a bar chart of Views per Title
-        st.write("### Views per Title:")
-        views_per_title = data.groupby('Title')['Views'].sum().sort_values(ascending=False)
-        st.bar_chart(views_per_title)
+        # Create pie chart of views distribution
+        views_distribution = filtered_data['Views'].value_counts()
+        st.write("### Views Distribution:")
+        st.pyplot(plt.pie(views_distribution, labels=views_distribution.index, autopct='%1.1f%%'))
 
-        # Display a scatter plot of Views vs Likes
-        st.write("### Views vs Likes:")
-        st.scatter_chart(data[['Views', 'Likes']])
-
-        # Display a scatter plot of Views vs Dislikes
-        st.write("### Views vs Dislikes:")
-        st.scatter_chart(data[['Views', 'Dislikes']])
-
-        # Display a scatter plot of Views vs Comments
-        st.write("### Views vs Comments:")
-        st.scatter_chart(data[['Views', 'Comments']])
+        # Create line chart of likes vs dislikes
+        st.write("### Likes vs Dislikes:")
+        st.line_chart(filtered_data[['Likes', 'Dislikes']])
 
 if __name__ == "__main__":
     main()
